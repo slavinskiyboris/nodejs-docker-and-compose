@@ -26,7 +26,7 @@ export const loginUser = (username, password) => {
   return fetch(`${URL}/auth/signin`, {
     method: "POST",
     headers: headersWithContentType,
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ name: username, password }),
   })
     .then(checkResponse)
     .then((data) => {
