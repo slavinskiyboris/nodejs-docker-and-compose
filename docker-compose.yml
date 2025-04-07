@@ -7,12 +7,14 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: always
-    depends_on:
-      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
     env_file:
       - ./backend/.env
-    ports:
-      - "4000:3000"
+    depends_on:
+      - postgres
     networks:
       - kupipodariday-network
 
