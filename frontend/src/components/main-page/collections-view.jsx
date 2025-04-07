@@ -146,6 +146,7 @@ const CollectionAddModal = ({
     e.preventDefault();
     errorMessage && setErrorMessage("");
 
+    // Получаем только необходимые поля для отправки
     const { name, image } = collectionData;
     
     // Фильтруем пустые wishId и гарантируем, что все они числа
@@ -154,8 +155,9 @@ const CollectionAddModal = ({
       .map(([key]) => Number(key))
       .filter(id => !isNaN(id));
 
-    console.log('Adding collection with items:', itemsId);
+    console.log('Adding collection with items:', { name, image, itemsId });
     
+    // Отправляем только нужные поля без description
     addCollection({ name, image, itemsId })
       .then((res) => {
         const { name, image, id, owner } = res;

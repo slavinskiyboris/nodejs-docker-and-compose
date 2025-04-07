@@ -141,10 +141,15 @@ const GiftAddModal = ({ onClose }) => {
     e.preventDefault();
     const isValid = formRef.current.checkValidity();
     setValid(isValid);
+    
+    // Обновляю обработку цены, чтобы она была строкой с двумя десятичными знаками
+    const name = e.target.name;
+    let value = e.target.value;
+    
+    // Устанавливаем данные в state
     setGiftData({
       ...giftData,
-      [e.target.name]:
-        e.target.name === "price" ? parseInt(e.target.value) : e.target.value,
+      [name]: value,
     });
   };
 
