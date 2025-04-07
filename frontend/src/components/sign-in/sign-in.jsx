@@ -17,14 +17,14 @@ import styles from "./sign-in.module.css";
 export const SignIn = ({ extraClass = "" }) => {
   const [_userCtx, setUserCtx] = useContext(UserContext);
   const [userData, setUserData] = useState({
-    username: "",
+    name: "",
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
 
   const history = useHistory();
 
-  const usernameValid = userData.username.length >= MINIMUM_USERNAME_LENGTH;
+  const usernameValid = userData.name.length >= MINIMUM_USERNAME_LENGTH;
   const passwordValid = userData.password.length >= MINIMUM_PASSWORD_LENGTH;
   const submitDisabled = !usernameValid || !passwordValid;
 
@@ -39,7 +39,7 @@ export const SignIn = ({ extraClass = "" }) => {
     event.preventDefault();
     errorMessage && setErrorMessage("");
     try {
-      const response = await loginUser(userData.username, userData.password);
+      const response = await loginUser(userData.name, userData.password);
       if (response && response.access_token) {
         const user = await getOwnUser();
         setUserCtx(user);
@@ -59,7 +59,7 @@ export const SignIn = ({ extraClass = "" }) => {
       </h2>
       <form className={styles.form} onSubmit={authorizeUser}>
         <Input
-          name={"username"}
+          name={"name"}
           type="text"
           id={1}
           placeholder="Введите имя пользователя"

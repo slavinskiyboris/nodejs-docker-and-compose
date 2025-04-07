@@ -20,7 +20,7 @@ import styles from "./sign-up.module.css";
 export const SignUp = ({ extraClass = "" }) => {
   const [_user, setUser] = useContext(UserContext);
   const [userData, setUserData] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     about: "",
@@ -35,8 +35,8 @@ export const SignUp = ({ extraClass = "" }) => {
   useEffect(() => {
     errorMessage && setErrorMessage("");
     const usernameValid =
-      userData.username.length >= MINIMUM_USERNAME_LENGTH &&
-      userData.username.length <= MAXIMUM_USERNAME_LENGTH;
+      userData.name.length >= MINIMUM_USERNAME_LENGTH &&
+      userData.name.length <= MAXIMUM_USERNAME_LENGTH;
     const passwordValid = userData.password.length >= MINIMUM_PASSWORD_LENGTH;
     const emailValid = EMAIL_REGULAR.test(userData.email);
     const descriptionValid = userData.about.length < MAXIMUM_DESCRIPTION_LENGTH;
@@ -78,7 +78,7 @@ export const SignUp = ({ extraClass = "" }) => {
 
       try {
         const { access_token } = await loginUser(
-          userData.username,
+          userData.name,
           userData.password
         );
         if (access_token) {
@@ -151,12 +151,12 @@ const StepOne = ({ onChangeInput, data }) => {
   return (
     <>
       <Input
-        name="username"
-        type="username"
+        name="name"
+        type="text"
         id={1}
         placeholder="Придумайте юзернейм"
         label="Юзернейм"
-        value={data.username}
+        value={data.name}
         onChange={onChangeInput}
         extraClass="mb-16"
         required={true}
