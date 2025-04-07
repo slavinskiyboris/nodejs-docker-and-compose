@@ -7,7 +7,9 @@ import { ISanitizedUser } from '../interfaces/sanitized-user.interface';
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
-    super();
+    super({
+      usernameField: 'name',
+    });
   }
 
   async validate(name: string, password: string): Promise<ISanitizedUser> {

@@ -1,11 +1,19 @@
 import { URL } from "./constants";
 
 const checkResponse = (res) => {
+  console.log('Checking response:', res.url, res.status);
   if (res.ok || res.created) {
-    return res.json();
+    return res.json().catch(err => {
+      console.error('Error parsing JSON:', err);
+      throw new Error('Ошибка при обработке ответа сервера');
+    });
   }
   return res.json().then((err) => {
+    console.error('Server error:', err);
     return Promise.reject(err);
+  }).catch(err => {
+    console.error('Error parsing error response:', err);
+    throw new Error('Ошибка на сервере: ' + (err.message || 'неизвестная ошибка'));
   });
 };
 const headersWithContentType = { "Content-Type": "application/json" };
@@ -15,27 +23,51 @@ const headersWithAuthorizeFn = () => ({
 });
 
 export const registerUser = (userData) => {
+  console.log('Registering user:', userData);
   return fetch(`${URL}/auth/signup`, {
     method: "POST",
     headers: headersWithContentType,
     body: JSON.stringify(userData),
-  }).then(checkResponse);
+  })
+  .then(res => {
+    console.log('Registration response status:', res.status);
+    return checkResponse(res);
+  })
+  .catch(err => {
+    console.error('Registration error:', err);
+    if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+      throw new Error('Ошибка соединения с сервером. Пожалуйста, проверьте подключение к интернету.');
+    }
+    throw err;
+  });
 };
 
 export const loginUser = (username, password) => {
+  console.log('Logging in user:', username);
   return fetch(`${URL}/auth/signin`, {
     method: "POST",
     headers: headersWithContentType,
     body: JSON.stringify({ name: username, password }),
   })
-    .then(checkResponse)
+    .then(res => {
+      console.log('Login response status:', res.status);
+      return checkResponse(res);
+    })
     .then((data) => {
+      console.log('Login successful, received token:', !!data.access_token);
       if (data.access_token) {
         sessionStorage.setItem("auth_token", data.access_token);
         return data;
       } else {
         return;
       }
+    })
+    .catch(err => {
+      console.error('Login error:', err);
+      if (err instanceof TypeError && err.message.includes('Failed to fetch')) {
+        throw new Error('Ошибка соединения с сервером. Пожалуйста, проверьте подключение к интернету.');
+      }
+      throw err;
     });
 };
 
