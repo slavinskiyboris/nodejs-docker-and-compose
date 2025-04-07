@@ -3,35 +3,40 @@ import { URL } from "./constants";
 const checkResponse = (res) => {
   console.log('Checking response:', res.url, res.status);
   
-  // Проверка на пустой ответ
+  // В случае пустого ответа (например, для DELETE запросов)
   if (res.status === 204) {
     return Promise.resolve({});
   }
   
-  if (res.ok || res.created) {
-    return res.text().then(text => {
-      if (!text) {
-        return {};
-      }
-      try {
-        return JSON.parse(text);
-      } catch (err) {
-        console.error('Error parsing JSON:', err);
-        throw new Error('Ошибка при обработке ответа сервера');
-      }
-    });
-  }
-  
+  // Получаем текст ответа
   return res.text().then(text => {
-    let err;
-    try {
-      err = text ? JSON.parse(text) : { message: 'Ошибка на сервере' };
-    } catch (e) {
-      console.error('Error parsing error response:', e);
-      err = { message: text || 'Неизвестная ошибка' };
+    // Обработка пустого ответа
+    if (!text) {
+      return res.ok ? {} : Promise.reject({ message: "Пустой ответ от сервера" });
     }
-    console.error('Server error:', err);
-    return Promise.reject(err);
+    
+    // Пытаемся распарсить JSON
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (e) {
+      console.error('JSON parse error:', e, 'Response text:', text);
+      // Возвращаем текст как есть в случае ошибки парсинга
+      return Promise.reject({ 
+        message: "Ошибка при обработке ответа сервера", 
+        originalText: text,
+        statusCode: res.status
+      });
+    }
+    
+    // Успешный ответ
+    if (res.ok || res.status === 201) {
+      return data;
+    }
+    
+    // Ошибка от сервера
+    data.statusCode = res.status;
+    return Promise.reject(data);
   });
 };
 const headersWithContentType = { "Content-Type": "application/json" };
