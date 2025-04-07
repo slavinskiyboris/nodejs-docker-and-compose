@@ -23,14 +23,18 @@ export const MainPage = ({ extraClass = "" }) => {
   const isLogin = !!user.id;
 
   useEffect(() => {
-    Promise.all([getLastCards(), getTopCards(), getOwnWishes()]).then(
-      ([last, top, ownWishes]) => {
-        setLastCards(last);
-        setTopCards(top);
-        setOwnWishes(ownWishes);
+    Promise.all([
+      getLastCards().catch(err => { console.error('Error loading last cards:', err); return []; }),
+      getTopCards().catch(err => { console.error('Error loading top cards:', err); return []; }),
+      isLogin ? getOwnWishes().catch(err => { console.error('Error loading own wishes:', err); return []; }) : Promise.resolve([])
+    ]).then(
+      ([last, top, own]) => {
+        setLastCards(Array.isArray(last) ? last : []);
+        setTopCards(Array.isArray(top) ? top : []);
+        setOwnWishes(Array.isArray(own) ? own : []);
       }
     );
-  }, []);
+  }, [isLogin]);
 
   const ownedTopCardsIds = findOwnedIds(ownWishes, topCards);
   const ownedLastCardsIds = findOwnedIds(ownWishes, lastCards);

@@ -1,4 +1,9 @@
 export const findOwnedIds = (my, another) => {
+  if (!Array.isArray(my) || !Array.isArray(another)) {
+    console.warn('findOwnedIds: один из аргументов не является массивом', { my, another });
+    return [];
+  }
+  
   return my
     .filter(({ id }) => {
       const match = another.find((wish) => wish.id === id);
