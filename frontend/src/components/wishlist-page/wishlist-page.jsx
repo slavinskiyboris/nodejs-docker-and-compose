@@ -19,9 +19,14 @@ export const WishlistPage = ({ extraClass = "" }) => {
 
   useEffect(() => {
     if (sessionStorage.getItem("auth_token")) {
-      getOwnWishes().then((res) => {
-        setOwnWishes(res);
-      });
+      getOwnWishes()
+        .then((res) => {
+          setOwnWishes(Array.isArray(res) ? res : []);
+        })
+        .catch(err => {
+          console.error('Error loading own wishes:', err);
+          setOwnWishes([]);
+        });
     }
   }, []);
 
@@ -118,24 +123,28 @@ export const WishlistPage = ({ extraClass = "" }) => {
         ""
       )}
       <div className={styles.cards_box}>
-        {data.map(({ id, price, image, name, raised }) => {
-          let withBorder = false;
-          if (currentCardsId.indexOf(id) !== -1) {
-            withBorder = true;
-          }
-          return (
-            <GoodCard
-              key={id}
-              id={id}
-              onClick={onCardClick}
-              price={price}
-              img={image}
-              name={name}
-              current={raised}
-              extraClass={withBorder ? styles.border : ""}
-            />
-          );
-        })}
+        {Array.isArray(data) && data.length > 0 ? (
+          data.map(({ id, price, image, name, raised }) => {
+            let withBorder = false;
+            if (currentCardsId.indexOf(id) !== -1) {
+              withBorder = true;
+            }
+            return (
+              <GoodCard
+                key={id}
+                id={id}
+                onClick={onCardClick}
+                price={price}
+                img={image}
+                name={name}
+                current={raised}
+                extraClass={withBorder ? styles.border : ""}
+              />
+            );
+          })
+        ) : (
+          <p className="text text_type_main">Ваш список желаний пуст</p>
+        )}
       </div>
     </section>
   );
