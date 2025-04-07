@@ -157,8 +157,8 @@ const CollectionAddModal = ({
 
     console.log('Adding collection with items:', { name, image, itemsId });
     
-    // Отправляем только нужные поля без description
-    addCollection({ name, image, itemsId })
+    // Отправляем обязательное поле description как пустую строку
+    addCollection({ name, image, itemsId, description: "" })
       .then((res) => {
         const { name, image, id, owner } = res;
         setCollectionsList([...collectionsList, { name, image, id, owner }]);
