@@ -81,14 +81,16 @@ export class UsersService {
     }
     
     if (updateUserDto.email || updateUserDto.name) {
-      const user_in_db = await this.userRepository.findOne({
-        where: [
-          { email: updateUserDto.email, id: { not: id } },
-          { name: updateUserDto.name, id: { not: id } }
-        ],
-      });
+      const existingUser = await this.userRepository
+        .createQueryBuilder('user')
+        .where('(user.email = :email OR user.name = :name)', {
+          email: updateUserDto.email,
+          name: updateUserDto.name,
+        })
+        .andWhere('user.id != :id', { id })
+        .getOne();
       
-      if (user_in_db) {
+      if (existingUser) {
         throw new ForbiddenException(
           'Пользователь с таким именем или email уже существует',
         );
