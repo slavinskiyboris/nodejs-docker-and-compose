@@ -125,10 +125,16 @@ const GiftAddModal = ({ onClose }) => {
   const submitGift = (e) => {
     e.preventDefault();
     const plucked = pluckEmptyFormFields(giftData);
-    createCard(plucked).then(() => {
-      onClose();
-      history.replace({ pathname: "/wishlist" });
-    });
+    
+    createCard(plucked)
+      .then(() => {
+        onClose();
+        history.replace({ pathname: "/wishlist" });
+      })
+      .catch((err) => {
+        console.error('Error creating gift:', err);
+        alert(`Ошибка при добавлении подарка: ${err.message || 'Проверьте введенные данные'}`);
+      });
   };
 
   const onFormChange = (e) => {
