@@ -19,16 +19,20 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const user_ib_db = this.userRepository.findOne({
-      where: { email: createUserDto.email, name: createUserDto.name },
+    const user_in_db = await this.userRepository.findOne({
+      where: [
+        { email: createUserDto.email },
+        { name: createUserDto.name }
+      ],
     });
-    if (user_ib_db) {
+    
+    if (user_in_db) {
       throw new ForbiddenException(
         'Пользователь с таким именем или email уже существует',
       );
     }
+    
     const user = this.userRepository.create(createUserDto);
-
     return this.userRepository.save(user);
   }
 
@@ -73,20 +77,30 @@ export class UsersService {
     userId: number,
   ): Promise<User> {
     if (id != userId) {
-      throw new ForbiddenException('You are not the owner of this profi;e');
+      throw new ForbiddenException('You are not the owner of this profile');
     }
-    const user_ib_db = this.userRepository.findOne({
-      where: { email: updateUserDto.email, name: updateUserDto.name },
-    });
-    if (user_ib_db) {
-      throw new ForbiddenException(
-        'Пользователь с таким именем или email уже существует',
-      );
+    
+    if (updateUserDto.email || updateUserDto.name) {
+      const user_in_db = await this.userRepository.findOne({
+        where: [
+          { email: updateUserDto.email, id: { not: id } },
+          { name: updateUserDto.name, id: { not: id } }
+        ],
+      });
+      
+      if (user_in_db) {
+        throw new ForbiddenException(
+          'Пользователь с таким именем или email уже существует',
+        );
+      }
     }
 
-    const hashedPassword = await this.hashService.hashPassword(
-      updateUserDto.password,
-    );
+    if (updateUserDto.password) {
+      updateUserDto.password = await this.hashService.hashPassword(
+        updateUserDto.password,
+      );
+    }
+    
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -95,7 +109,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    Object.assign(user, { ...updateUserDto, password: hashedPassword });
+    Object.assign(user, updateUserDto);
 
     return this.userRepository.save(user);
   }
