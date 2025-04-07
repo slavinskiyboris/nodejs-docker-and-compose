@@ -147,12 +147,15 @@ const CollectionAddModal = ({
     errorMessage && setErrorMessage("");
 
     const { name, image } = collectionData;
-    const itemsId = Object.entries(collectionData.wishes).map(([key, val]) => {
-      if (val) {
-        return +key;
-      }
-    });
+    
+    // Фильтруем пустые wishId и гарантируем, что все они числа
+    const itemsId = Object.entries(collectionData.wishes || {})
+      .filter(([key, val]) => val === true)
+      .map(([key]) => Number(key))
+      .filter(id => !isNaN(id));
 
+    console.log('Adding collection with items:', itemsId);
+    
     addCollection({ name, image, itemsId })
       .then((res) => {
         const { name, image, id, owner } = res;
@@ -160,7 +163,8 @@ const CollectionAddModal = ({
         onClose();
       })
       .catch((err) => {
-        setErrorMessage(err.message);
+        console.error('Error adding collection:', err);
+        setErrorMessage(err.message || 'Ошибка при добавлении коллекции');
       });
   };
 
