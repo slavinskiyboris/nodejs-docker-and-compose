@@ -2,18 +2,36 @@ import { URL } from "./constants";
 
 const checkResponse = (res) => {
   console.log('Checking response:', res.url, res.status);
+  
+  // Проверка на пустой ответ
+  if (res.status === 204) {
+    return Promise.resolve({});
+  }
+  
   if (res.ok || res.created) {
-    return res.json().catch(err => {
-      console.error('Error parsing JSON:', err);
-      throw new Error('Ошибка при обработке ответа сервера');
+    return res.text().then(text => {
+      if (!text) {
+        return {};
+      }
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        console.error('Error parsing JSON:', err);
+        throw new Error('Ошибка при обработке ответа сервера');
+      }
     });
   }
-  return res.json().then((err) => {
+  
+  return res.text().then(text => {
+    let err;
+    try {
+      err = text ? JSON.parse(text) : { message: 'Ошибка на сервере' };
+    } catch (e) {
+      console.error('Error parsing error response:', e);
+      err = { message: text || 'Неизвестная ошибка' };
+    }
     console.error('Server error:', err);
     return Promise.reject(err);
-  }).catch(err => {
-    console.error('Error parsing error response:', err);
-    throw new Error('Ошибка на сервере: ' + (err.message || 'неизвестная ошибка'));
   });
 };
 const headersWithContentType = { "Content-Type": "application/json" };
@@ -205,7 +223,7 @@ export const removeCard = (id) => {
 };
 
 export const addCollection = (data) => {
-  return fetch(`${URL}/wishlistlists`, {
+  return fetch(`${URL}/wishlists`, {
     method: "POST",
     headers: headersWithAuthorizeFn(),
     body: JSON.stringify(data),
@@ -213,21 +231,21 @@ export const addCollection = (data) => {
 };
 
 export const getCollections = () => {
-  return fetch(`${URL}/wishlistlists`, {
+  return fetch(`${URL}/wishlists`, {
     method: "GET",
     headers: headersWithAuthorizeFn(),
   }).then(checkResponse);
 };
 
 export const getCollection = (id) => {
-  return fetch(`${URL}/wishlistlists/${id}`, {
+  return fetch(`${URL}/wishlists/${id}`, {
     method: "GET",
     headers: headersWithAuthorizeFn(),
   }).then(checkResponse);
 };
 
 export const deleteCollection = (id) => {
-  return fetch(`${URL}/wishlistlists/${id}`, {
+  return fetch(`${URL}/wishlists/${id}`, {
     method: "DELETE",
     headers: headersWithAuthorizeFn(),
   }).then(checkResponse);

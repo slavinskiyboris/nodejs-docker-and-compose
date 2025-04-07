@@ -1,4 +1,6 @@
-export const URL = "https://api.slavinskiy2.nomorepartiessbs.ru";
+export const URL = process.env.NODE_ENV === 'production' 
+  ? "https://api.slavinskiy2.nomorepartiessbs.ru" 
+  : "http://localhost:4000";
 
 export const MINIMUM_PASSWORD_LENGTH = 3;
 export const MINIMUM_USERNAME_LENGTH = 3;
