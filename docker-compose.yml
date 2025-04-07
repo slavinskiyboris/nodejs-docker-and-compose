@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     depends_on:
-      - database
+      - postgres
     env_file:
       - ./backend/.env
     ports:
@@ -27,7 +27,7 @@ services:
     networks:
       - kupipodariday-network
 
-  database:
+  postgres:
     container_name: kupipodariday-db
     image: postgres:12
     restart: always
